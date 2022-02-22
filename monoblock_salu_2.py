@@ -1,254 +1,135 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[1]:
-
-
 import paramak
-
-
-# In[2]:
-
+# import openmc
+# import os
+# import openmc_dagmc_wrapper as odw
 
 rotated_circle = paramak.ExtrudeCircleShape(
-    points=[
-         (0, 0),
-       
-        
-    ],
-    radius=.95,
-    distance=1.2,
-    workplane='XZ',
-    stl_filename='part0.stl',
+    points=[(0, 0),], radius=0.95, distance=1.2, workplane="XZ", name="part0.stl",
 )
 
-rotated_circle.show()
 
-
-# In[ ]:
-
-
-
-
-
-# In[3]:
-
-
-grey_part = paramak.ExtrudeMixedShape(
+grey_part = paramak.ExtrudeStraightShape(
     points=[
-         (-1.15, -1.25, 'straight'),
-         (1.15, -1.25, 'straight'),
-         (1.15, 1.75, 'straight'),
-         (-1.15, 1.75, 'straight'),
-         
+        (-1.15, -1.25, "straight"),
+        (1.15, -1.25, "straight"),
+        (1.15, 1.75, "straight"),
+        (-1.15, 1.75, "straight"),
     ],
     distance=1.2,
-    color=(0.5,0.5,0.5),
+    color=(0.5, 0.5, 0.5),
     cut=rotated_circle,
-    material_tag='tungsten',
-    stp_filename='part1.stp',
-    stl_filename='part1.stl',
+    name="grey_part",
 )
 
-grey_part.show()
-
-
-# In[ ]:
-
-
-
-
-
-# In[4]:
-
-
-rotated_straights = paramak.RotateMixedShape(
+red_part = paramak.RotateStraightShape(
     points=[
-         (.75, -.6, 'straight'),
-         (.95, -.6, 'straight'),
-         (.95, .6, 'straight'),
-         (.75, .6, 'straight'),
-         
+        (0.75, -0.6, "straight"),
+        (0.95, -0.6, "straight"),
+        (0.95, 0.6, "straight"),
+        (0.75, 0.6, "straight"),
     ],
-    workplane='XY',
+    color=(0.5, 0, 0),
+    workplane="XY",
     rotation_angle=360,
-    material_tag='Cu',
-    stl_filename='part2.stl',
+    name="red_part",
 )
 
-rotated_straights.show()
-
-
-# In[ ]:
-
-
-
-
-
-# In[5]:
-
-
-rotated_straights1 = paramak.RotateMixedShape(
+blue_part = paramak.RotateStraightShape(
     points=[
-         (.6, -.6, 'straight'),
-         (.75, -.6, 'straight'),
-         (.75, .6, 'straight'),
-         (.6, .6, 'straight'),
-         
+        (0.6, -0.6, "straight"),
+        (0.75, -0.6, "straight"),
+        (0.75, 0.6, "straight"),
+        (0.6, 0.6, "straight"),
     ],
-    workplane='XY',
+    color=(0, 0, 0.5),
+    workplane="XY",
     rotation_angle=360,
-    material_tag='cuzrcr',
-    stl_filename='part3.stl',
+    name="blue_part",
 )
 
-rotated_straights1.show()
+my_reactor = paramak.Reactor([grey_part, red_part, blue_part])
 
+os.system("mbconvert dagmc.h5m dagmc.vtk")
 
-# In[6]:
+# exports the reactor shapes as a DAGMC h5m file which can be used as
+# neutronics geometry by OpenMC
+my_reactor.export_dagmc_h5m("dagmc.h5m", exclude=["plasma"])
 
+w = openmc.Material(name="w")
+w.add_element("W", 1)
+w.set_density("g/cc", 19.3)
 
-myreactor=paramak.Reactor([grey_part,rotated_straights,rotated_straights1])
-myreactor.show()
+zirconium = openmc.Material(name="zirconium")
+zirconium.add_element("zirconium", 1)
+zirconium.set_density("g/cc", 6.6)
 
+cr = openmc.Material(name="cr")
+cr.add_element("Cr", 1)
+cr.set_density("g/cc", 7.19)
 
-# In[7]:
+cu = openmc.Material(name="cu")
+cu.add_element("Cr", 0.012)
+cu.add_element("Zr", 0.0007)
+cu.set_density("g/cc", 8.96)
 
+copper = openmc.Material(name="copper")
+copper.add_element("copper", 1)
+copper.set_density("g/cc", 8.96)
 
-import openmc
-w=openmc.Material(name='w')
-w.add_element('W',1)
-w.set_density('g/cc',19.3)
-w
+# WARNING not all these materials are used !!!
 
+geometry = odw.Geometry(h5m_filename="dagmc.h5m")
 
-# In[ ]:
-
-
-
-
-
-# In[8]:
-
-
-
-zirconium=openmc.Material(name='zirconium')
-zirconium.add_element('zirconium',1)
-zirconium.set_density('g/cc',6.6)
-zirconium
-
-
-# In[ ]:
-
-
-
-
-
-# In[9]:
-
-
-
-cr=openmc.Material(name='cr')
-cr.add_element('Cr',1)
-cr.set_density('g/cc',7.19)
-cr
-
-
-# In[ ]:
-
-
-
-
-
-# In[10]:
-
-
-
-cu=openmc.Material(name='cu')
-cu.add_element('Cr',.012)
-cu.add_element('Zr',.0007)
-cu.set_density('g/cc',8.96)
-cu
-
-
-# In[ ]:
-
-
-
-
-
-# In[11]:
-
-
-
-copper=openmc.Material(name='copper')
-copper.add_element('copper',1)
-copper.set_density('g/cc',8.96)
-copper
-
-
-# In[21]:
-
-
-
-ource = openmc.Source()
+my_source = openmc.Source()
 
 # sets the location of the source to x=0 y=0 z=0
-source.space = openmc.stats.Point((0, 0, 50))
+my_source.space = openmc.stats.Point((0, 0, 50))
 
 # sets the direction to isotropic
-source.angle = openmc.stats.Isotropic()
+my_source.angle = openmc.stats.Isotropic()
 
 # sets the energy distribution to 100% 14MeV neutrons
-source.energy = openmc.stats.Discrete([14e6], [1])
+my_source.energy = openmc.stats.Discrete([14e6], [1])
 
 
-# In[27]:
-
-
-import paramak_neutronics
-my_model = paramak_neutronics.NeutronicsModel(
-    geometry=myreactor,
-    source=source,
-    simulation_batches=500,  # this should be increased to get a better mesh tally result
-    simulation_particles_per_batch=100000,  # this should be increased to get a better mesh tally result
-    materials = {'tungsten':w,'Cu':copper,'cuzrcr':cu},
-    mesh_tally_3d=['(n,Xt)','heating','damage-energy'],
-    mesh_tally_2d=['(n,Xt)','heating'],
-    
-    mesh_3d_resolution=(25,5,25),
-    mesh_3d_corners=[(-1.15,-0.6,-1.25),(1.15,0.6,1.75)]
+# this links the material tags in the dagmc h5m file with materials.
+# these materials are input as strings so they will be looked up in the
+# neutronics material maker package
+materials = odw.Materials(
+    h5m_filename=geometry.h5m_filename,
+    correspondence_dict={
+        "mat_tungsten": zirconium,
+        "mat_copper": copper,
+        "mat_cuzrcr": cr,
+    },
 )
 
-my_model.simulate()
+# gets the corners of the geometry for use later
+bounding_box = geometry.corners()
 
+tally1 = odw.MeshTally3D(
+    mesh_resolution=(25, 5, 25),
+    bounding_box=bounding_box,  # consider using original bounding box in stead of automatic one [(-1.15,-0.6,-1.25),(1.15,0.6,1.75)]
+    tally_type="heating",
+)
 
-# In[60]:
+# TODO add 2d and 3d tallies for (n,Xt)','heating','damage-energy'
 
+tallies = openmc.Tallies([tally1])
 
-get_ipython().system('ls *.h5m')
+my_settings = odw.FusionSettings()
+my_settings.batches = 500
+my_settings.particles = 100000
+my_settings.source = my_source
+my_model = openmc.Model(
+    materials=materials, geometry=geometry, settings=my_settings, tallies=tallies
+)
 
+# starts the simulation
+statepoint_file = my_model.run()
 
-# In[16]:
-
-
-
-
-
-# In[ ]:
-
-
-
+print(f"neutronics results are saved in {statepoint_file}")
 

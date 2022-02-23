@@ -14,12 +14,9 @@ RUN apt-get --allow-releaseinfo-change update
 RUN apt-get install -y libgl1-mesa-glx libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libosmesa6 libosmesa6-dev libgles2-mesa-dev
 
 RUN conda install -c conda-forge mamba
-RUN mamba install -c cadquery -c conda-forge cadquery==master
-# RUN mamba install -c fusion-energy -c cadquery -c conda-forge paramak
-RUN mamba install -c fusion-energy -c cadquery -c conda-forge brep_to_h5m brep_part_finder
-RUN mamba install -c fusion-energy -c cadquery -c conda-forge paramak
-# needs dagmc as well
+
+RUN mamba install -c fusion-energy -c cadquery -c conda-forge paramak_develop
+
+# this needs dagmc as well, which we are working on
 RUN mamba install -c conda-forge openmc
 
-
-COPY monoblock_salu_2.py .

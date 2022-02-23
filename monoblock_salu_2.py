@@ -2,9 +2,9 @@
 # coding: utf-8
 
 import paramak
-# import openmc
-# import os
-# import openmc_dagmc_wrapper as odw
+import openmc
+import os
+import openmc_dagmc_wrapper as odw
 
 rotated_circle = paramak.ExtrudeCircleShape(
     points=[(0, 0),], radius=0.95, distance=1.2, workplane="XZ", name="part0.stl",
@@ -13,10 +13,10 @@ rotated_circle = paramak.ExtrudeCircleShape(
 
 grey_part = paramak.ExtrudeStraightShape(
     points=[
-        (-1.15, -1.25, "straight"),
-        (1.15, -1.25, "straight"),
-        (1.15, 1.75, "straight"),
-        (-1.15, 1.75, "straight"),
+        (-1.15, -1.25),
+        (1.15, -1.25),
+        (1.15, 1.75),
+        (-1.15, 1.75),
     ],
     distance=1.2,
     color=(0.5, 0.5, 0.5),
@@ -26,10 +26,10 @@ grey_part = paramak.ExtrudeStraightShape(
 
 red_part = paramak.RotateStraightShape(
     points=[
-        (0.75, -0.6, "straight"),
-        (0.95, -0.6, "straight"),
-        (0.95, 0.6, "straight"),
-        (0.75, 0.6, "straight"),
+        (0.75, -0.6),
+        (0.95, -0.6),
+        (0.95, 0.6),
+        (0.75, 0.6),
     ],
     color=(0.5, 0, 0),
     workplane="XY",
@@ -39,10 +39,10 @@ red_part = paramak.RotateStraightShape(
 
 blue_part = paramak.RotateStraightShape(
     points=[
-        (0.6, -0.6, "straight"),
-        (0.75, -0.6, "straight"),
-        (0.75, 0.6, "straight"),
-        (0.6, 0.6, "straight"),
+        (0.6, -0.6),
+        (0.75, -0.6),
+        (0.75, 0.6),
+        (0.6, 0.6),
     ],
     color=(0, 0, 0.5),
     workplane="XY",
@@ -52,11 +52,13 @@ blue_part = paramak.RotateStraightShape(
 
 my_reactor = paramak.Reactor([grey_part, red_part, blue_part])
 
+# exports the reactor shapes as a DAGMC h5m file which can be used as
+# we will need to decrease the mesh size on this function to make the geometry better
+my_reactor.export_dagmc_h5m("dagmc.h5m")
+
+# we can open the vtk in paraview to have a look at the geometry
 os.system("mbconvert dagmc.h5m dagmc.vtk")
 
-# exports the reactor shapes as a DAGMC h5m file which can be used as
-# neutronics geometry by OpenMC
-my_reactor.export_dagmc_h5m("dagmc.h5m", exclude=["plasma"])
 
 w = openmc.Material(name="w")
 w.add_element("W", 1)

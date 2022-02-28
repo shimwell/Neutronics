@@ -15,8 +15,5 @@ RUN apt-get install -y libgl1-mesa-glx libgl1-mesa-dev libglu1-mesa-dev freeglut
 
 RUN conda install -c conda-forge mamba
 
-RUN mamba install -c fusion-energy -c cadquery -c conda-forge paramak_develop
-
-# this needs dagmc as well, which we are working on
-RUN mamba install -c conda-forge openmc
+RUN mamba install -c fusion-energy -c cadquery -c conda-forge paramak_develop openmc
 

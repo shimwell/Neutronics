@@ -3,17 +3,12 @@
 # build with
 # docker build -t neutronics .
 # run with
-# docker run -v $PWD:/shared_folder -it neutronics
+# docker run -p 8888:8888 neutronics
 
 
-FROM continuumio/miniconda3:4.10.3
+FROM ghcr.io/fusion-energy/neutronics-workshop:dependencies
 
-# ghcr.io/openmc-data-storage/miniconda3_4.9.2_endfb-7.1_nndc_tendl_2019
+COPY monoblock_salu.ipynb .
 
-RUN apt-get --allow-releaseinfo-change update
-RUN apt-get install -y libgl1-mesa-glx libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libosmesa6 libosmesa6-dev libgles2-mesa-dev
 
-RUN conda install -c conda-forge mamba
-
-RUN mamba install -c fusion-energy -c cadquery -c conda-forge paramak_develop openmc
-
+CMD ["jupyter", "lab", "--notebook-dir=/", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
